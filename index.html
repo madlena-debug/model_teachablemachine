@@ -15,6 +15,8 @@
     <br><br>
     <button id="predictButton">Започни предсказване</button>
 
+    <p id="result"></p> <!-- За показване на резултата -->
+
     <script>
         let model;
         let video;
@@ -68,8 +70,18 @@
 
                 console.log('Предсказани вероятности:', result);
 
-                // Можете да добавите логика за интерпретиране на резултата тук
-                alert('Предсказаното е: ' + result);
+                // Намираме класа с най-голяма вероятност
+                const maxProbability = Math.max(...result);
+                const classIndex = result.indexOf(maxProbability);
+
+                // Тук трябва да добавите имената на класовете в съответствие с вашия модел
+                const classNames = ['Не сте котка', 'Сте котка']; // Пример за два класа: котка и не котка
+
+                // Извеждаме съобщението на базата на класа
+                const message = classNames[classIndex];
+
+                // Показваме резултата на потребителя
+                document.getElementById('result').innerText = `Предсказание: ${message}`;
             } else {
                 console.log('Моделът не е зареден');
             }
