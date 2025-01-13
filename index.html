@@ -15,8 +15,7 @@
 
         // Функция за зареждане на модела от GitHub
         async function loadModel() {
-            model = await tf.loadLayersModel('https://raw.githubusercontent.com/madlena-debug/model_teachablemachine/blob/main/model.json');
-            console.log('Моделът е зареден!');
+            model = await tf.loadLayersModel('https://raw.githubusercontent.com/madlena-debug/model_teachablemachine/refs/heads/main/model.json'
         }
 
         // Зареждаме модела при зареждане на страницата
