@@ -22,6 +22,7 @@
         let video;
         let canvas;
         let ctx;
+        let isPredicting = false; // Състояние, което показва дали правим предсказване
 
         // Функция за зареждане на модела
         async function loadModel() {
@@ -51,7 +52,9 @@
 
         // Функция за предсказване върху изображение от камерата
         async function predict() {
-            if (model) {
+            if (model && !isPredicting) { // Проверка дали вече не правим предсказване
+                isPredicting = true; // Задаваме флаг, че започваме предсказване
+
                 // Извличане на кадър от видеото в канвас
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
@@ -82,8 +85,11 @@
 
                 // Показваме резултата на потребителя
                 document.getElementById('result').innerText = `Предсказание: ${message}`;
+
+                // Задаваме флаг обратно на false след като приключим с предсказването
+                isPredicting = false;
             } else {
-                console.log('Моделът не е зареден');
+                console.log('Моделът не е зареден или вече правим предсказване');
             }
         }
 
@@ -95,8 +101,7 @@
 
         // Започваме предсказването при натискане на бутона
         document.getElementById('predictButton').addEventListener('click', () => {
-            // Повтаряме предсказването на всеки кадър
-            setInterval(predict, 1000); // Предсказваме всяка секунда
+            predict(); // Извикваме предсказването само веднъж
         });
     </script>
 </body>
