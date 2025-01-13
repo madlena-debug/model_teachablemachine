@@ -73,4 +73,102 @@
     <button id="predictButton">Започни предсказване</button>
     <button id="reloadButton">Презареди</button> <!-- Нов бутон за презареждане -->
 
-    <p id="result"></p> <!-
+    <p id="result"></p> <!-- За показване на резултата -->
+
+    <script>
+        let model;
+        let video;
+        let canvas;
+        let ctx;
+        let isPredicting = false; // Състояние, което показва дали правим предсказване
+
+        // Функция за зареждане на модела
+        async function loadModel() {
+            try {
+                model = await tf.loadLayersModel('https://raw.githubusercontent.com/madlena-debug/model_teachablemachine/main/model.json');
+                console.log('Моделът е зареден!');
+            } catch (error) {
+                console.error('Грешка при зареждане на модела:', error);
+            }
+        }
+
+        // Функция за инициализация на камерата
+        async function setupCamera() {
+            video = document.getElementById('videoElement');
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480 }
+            });
+            video.srcObject = stream;
+
+            // Създаване на canvas за извличане на кадри от видео потока
+            canvas = document.createElement('canvas');
+            canvas.width = 640;
+            canvas.height = 480;
+            ctx = canvas.getContext('2d');
+        }
+
+        // Функция за предсказване върху изображение от камерата
+        async function predict() {
+            if (model && !isPredicting) { // Проверка дали вече не правим предсказване
+                isPredicting = true; // Задаваме флаг, че започваме предсказване
+
+                // Извличане на кадър от видеото в канвас
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Преобразуване на кадъра в тензор
+                const inputTensor = tf.browser.fromPixels(canvas)
+                    .resizeNearestNeighbor([224, 224]) // Преоразмеряваме до подходящия размер
+                    .toFloat()
+                    .expandDims(0); // Добавяме още едно измерение за партида (batch size)
+
+                // Проверка на формата на входния тензор (за дебъг)
+                console.log('Входен тензор:', inputTensor.shape);
+
+                // Предсказване на кадъра
+                const prediction = model.predict(inputTensor);
+                const result = prediction.dataSync(); // Получаваме резултатите от предсказването
+
+                console.log('Предсказани вероятности:', result);
+
+                // Намираме класа с най-голяма вероятност
+                const maxProbability = Math.max(...result);
+                const classIndex = result.indexOf(maxProbability);
+
+                // Тук трябва да добавите имената на класовете в съответствие с вашия модел
+                const classNames = ['Не сте котка', 'Сте котка']; // Пример за два класа: котка и не котка
+
+                // Извеждаме съобщението на базата на класа
+                const message = classNames[classIndex];
+
+                // Показваме резултата на потребителя
+                document.getElementById('result').innerText = `Предсказание: ${message}`;
+
+                // Задаваме флаг обратно на false след като приключим с предсказването
+                isPredicting = false;
+            } else {
+                console.log('Моделът не е зареден или вече правим предсказване');
+            }
+        }
+
+        // Функция за презареждане
+        function reloadPage() {
+            location.reload(); // Презарежда страницата
+        }
+
+        // Зареждаме модела при зареждане на страницата
+        window.onload = async function() {
+            await loadModel();
+            await setupCamera();
+        };
+
+        // Започваме предсказването при натискане на бутона
+        document.getElementById('predictButton').addEventListener('click', () => {
+            predict(); // Извикваме предсказването само веднъж
+        });
+
+        // Добавяме функционалност към бутона за презареждане
+        document.getElementById('reloadButton').addEventListener('click', reloadPage);
+    </script>
+</body>
+</html>
