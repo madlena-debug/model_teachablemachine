@@ -14,7 +14,7 @@
 
         // Функция за зареждане на модела
         async function loadModel() {
-            model = await tf.loadLayersModel('model.json'); // Пътят към модела
+            model = await tf.loadLayersModel('https://raw.githubusercontent.com/madlena-debug/model_teachablemachine/refs/heads/main/model.json'); // Пътят към модела
             console.log('Моделът е зареден!');
         }
 
