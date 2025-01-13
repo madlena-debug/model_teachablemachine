@@ -18,8 +18,8 @@
             margin: 20px auto;
             border: 2px solid #ddd;
             border-radius: 10px;
-            max-width: 100%; /* Гарантира, че видеото ще се адаптира към ширината на екрана */
-            height: auto; /* Запазва пропорциите на видеото */
+            max-width: 100%;
+            height: auto;
         }
 
         button {
@@ -42,19 +42,18 @@
             color: #333;
         }
 
-        /* Допълнителни стилове за по-малки устройства */
         @media (max-width: 768px) {
             video {
-                width: 80%; /* По-малкият екран ще покаже видеото на 90% от ширината */
+                width: 90%;
             }
 
             button {
-                font-size: 14px; /* Намаляване на размера на текста на бутоните */
+                font-size: 14px;
                 padding: 8px 16px;
             }
 
             p {
-                font-size: 16px; /* Намаляване на текста за резултатите */
+                font-size: 16px;
             }
         }
     </style>
@@ -69,14 +68,14 @@
     <button id="predictButton">Започни предсказване</button>
     <button id="reloadButton">Презареди страницата</button>
 
-    <p id="result"></p> <!-- За показване на резултата -->
+    <p id="result"></p>
 
     <script>
         let model;
         let video;
         let canvas;
         let ctx;
-        let isPredicting = false; // Състояние, което показва дали правим предсказване
+        let isPredicting = false;
 
         // Функция за зареждане на модела
         async function loadModel() {
@@ -94,13 +93,12 @@
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'user' } // Включва предната камера на телефона
+                    video: { facingMode: 'user' }
                 });
                 video.srcObject = stream;
 
-                // Създаване на canvas за извличане на кадри от видео потока
                 canvas = document.createElement('canvas');
-                canvas.width = 224; // Размер, подходящ за вход към модела
+                canvas.width = 224;
                 canvas.height = 224;
                 ctx = canvas.getContext('2d');
                 console.log('Камерата е стартирана!');
@@ -110,60 +108,60 @@
             }
         }
 
-        // Функция за предсказване върху изображение от камерата
+        // Функция за предсказване
         async function predict() {
-            if (model && !isPredicting) { // Проверка дали вече не правим предсказване
-                isPredicting = true; // Задаваме флаг, че започваме предсказване
+            if (model && !isPredicting) {
+                isPredicting = true;
 
-                // Извличане на кадър от видеото в канвас
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                // Преобразуване на кадъра в тензор
                 const inputTensor = tf.browser.fromPixels(canvas)
-                    .resizeNearestNeighbor([224, 224]) // Преоразмеряваме до подходящия размер
+                    .resizeNearestNeighbor([224, 224])
                     .toFloat()
-                    .expandDims(0); // Добавяме още едно измерение за партида (batch size)
+                    .expandDims(0);
 
-                // Предсказване на кадъра
                 const prediction = model.predict(inputTensor);
-                const result = prediction.dataSync(); // Получаваме резултатите от предсказването
+                const result = prediction.dataSync();
 
                 console.log('Предсказани вероятности:', result);
 
-                // Намираме класа с най-голяма вероятност
                 const maxProbability = Math.max(...result);
                 const classIndex = result.indexOf(maxProbability);
 
-                // Тук трябва да добавите имената на класовете в съответствие с вашия модел
-                const classNames = ['Не сте котка', 'Сте котка']; // Пример за два класа: котка и не котка
-
-                // Извеждаме съобщението на базата на класа
+                const classNames = ['Не сте котка', 'Сте котка'];
                 const message = classNames[classIndex];
 
-                // Показваме резултата на потребителя
                 document.getElementById('result').innerText = `Предсказание: ${message}`;
-
-                // Задаваме флаг обратно на false след като приключим с предсказването
                 isPredicting = false;
             } else {
                 console.log('Моделът не е зареден или вече правим предсказване');
             }
         }
 
-        // Зареждаме модела при зареждане на страницата
+        // Функция за рестартиране на камерата
+        async function restartCamera() {
+            const stream = video.srcObject;
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop()); // Спиране на всички текущи тракове
+            }
+            await setupCamera(); // Повторно стартиране на камерата
+        }
+
+        // Инициализация при зареждане на страницата
         window.onload = async function() {
             await loadModel();
             await setupCamera();
         };
 
-        // Започваме предсказването при натискане на бутона
+        // Предсказване при натискане на бутона
         document.getElementById('predictButton').addEventListener('click', () => {
-            predict(); // Извикваме предсказването само веднъж
+            predict();
         });
 
-        // Презареждаме страницата при натискане на бутона за презареждане
-        document.getElementById('reloadButton').addEventListener('click', () => {
-            location.reload(); // Презареждаме страницата
+        // Презареждане на страницата при натискане на бутона
+        document.getElementById('reloadButton').addEventListener('click', async () => {
+            await restartCamera();
+            document.getElementById('result').innerText = ''; // Изчистване на съобщението
         });
     </script>
 </body>
