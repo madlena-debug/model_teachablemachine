@@ -12,12 +12,16 @@
             margin: 0;
             padding: 0;
         }
+
         video {
-            margin: 20px auto;
             display: block;
+            margin: 20px auto;
             border: 2px solid #ddd;
             border-radius: 10px;
+            max-width: 100%; /* Гарантира, че видеото ще се адаптира към ширината на екрана */
+            height: auto; /* Запазва пропорциите на видеото */
         }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -28,12 +32,30 @@
             cursor: pointer;
             font-size: 16px;
         }
+
         button:hover {
             background-color: #45a049;
         }
+
         p {
             font-size: 18px;
             color: #333;
+        }
+
+        /* Допълнителни стилове за по-малки устройства */
+        @media (max-width: 768px) {
+            video {
+                width: 90%; /* По-малкият екран ще покаже видеото на 90% от ширината */
+            }
+
+            button {
+                font-size: 14px; /* Намаляване на размера на текста на бутоните */
+                padding: 8px 16px;
+            }
+
+            p {
+                font-size: 16px; /* Намаляване на текста за резултатите */
+            }
         }
     </style>
 </head>
@@ -41,7 +63,7 @@
     <h1>Модел с камера</h1>
 
     <!-- Видео елемент за показване на камерата -->
-    <video id="videoElement" width="640" height="480" autoplay></video>
+    <video id="videoElement" autoplay></video>
 
     <br><br>
     <button id="predictButton">Започни предсказване</button>
@@ -72,14 +94,14 @@
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 }
+                    video: { facingMode: 'user' } // Включва предната камера на телефона
                 });
                 video.srcObject = stream;
 
                 // Създаване на canvas за извличане на кадри от видео потока
                 canvas = document.createElement('canvas');
-                canvas.width = 640;
-                canvas.height = 480;
+                canvas.width = 224; // Размер, подходящ за вход към модела
+                canvas.height = 224;
                 ctx = canvas.getContext('2d');
                 console.log('Камерата е стартирана!');
             } catch (error) {
