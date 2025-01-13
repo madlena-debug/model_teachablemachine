@@ -3,20 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Моят сайт с модел</title>
+    <title>Модел с камера</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> <!-- Зареждаме TensorFlow.js -->
 </head>
 <body>
-    <h1>Добре дошли в сайта ми с модел!</h1>
-    <button id="predictButton">Предсказване</button>
+    <h1>Модел с камера</h1>
+
+    <!-- Видео елемент за показване на камерата -->
+    <video id="videoElement" width="640" height="480" autoplay></video>
+
+    <br><br>
+    <button id="predictButton">Започни предсказване</button>
 
     <script>
         let model;
+        let video;
+        let canvas;
+        let ctx;
 
         // Функция за зареждане на модела
         async function loadModel() {
             try {
-                // Използвайте правилния Raw URL на вашия модел
                 model = await tf.loadLayersModel('https://raw.githubusercontent.com/madlena-debug/model_teachablemachine/main/model.json');
                 console.log('Моделът е зареден!');
             } catch (error) {
@@ -24,23 +31,57 @@
             }
         }
 
-        // Зареждаме модела при зареждане на страницата
-        window.onload = loadModel;
+        // Функция за инициализация на камерата
+        async function setupCamera() {
+            video = document.getElementById('videoElement');
 
-        // Примерна функция за предсказване
-        document.getElementById('predictButton').addEventListener('click', () => {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480 }
+            });
+            video.srcObject = stream;
+
+            // Създаване на canvas за извличане на кадри от видео потока
+            canvas = document.createElement('canvas');
+            canvas.width = 640;
+            canvas.height = 480;
+            ctx = canvas.getContext('2d');
+        }
+
+        // Функция за предсказване върху изображение от камерата
+        async function predict() {
             if (model) {
-                // Примерни данни за предсказване
-                const inputData = tf.tensor([/* тук поставете вашите входни данни за предсказване */]);
+                // Извличане на кадър от видеото в канвас
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Преобразуване на кадъра в тензор
+                const inputTensor = tf.browser.fromPixels(canvas)
+                    .resizeNearestNeighbor([224, 224]) // Преоразмеряваме до подходящия размер
+                    .toFloat()
+                    .expandDims(0); // Добавяме още едно измерение за партида
 
-                // Извършване на предсказване
-                const prediction = model.predict(inputData);
-                prediction.print(); // Това ще покаже резултата в конзолата
+                // Предсказване на кадъра
+                const prediction = model.predict(inputTensor);
+                const result = prediction.dataSync(); // Получаваме резултатите от предсказването
 
-                console.log('Предсказване е извършено!');
+                console.log('Предсказани вероятности:', result);
+
+                // Можете да добавите логика за интерпретиране на резултата тук
+                alert('Предсказаното е: ' + result);
             } else {
-                console.log('Моделът не е зареден.');
+                console.log('Моделът не е зареден');
             }
+        }
+
+        // Зареждаме модела при зареждане на страницата
+        window.onload = async function() {
+            await loadModel();
+            await setupCamera();
+        };
+
+        // Започваме предсказването при натискане на бутона
+        document.getElementById('predictButton').addEventListener('click', () => {
+            // Повтаряме предсказването на всеки кадър
+            setInterval(predict, 1000); // Предсказваме всяка секунда
         });
     </script>
 </body>
