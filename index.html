@@ -57,7 +57,10 @@
                 const inputTensor = tf.browser.fromPixels(canvas)
                     .resizeNearestNeighbor([224, 224]) // Преоразмеряваме до подходящия размер
                     .toFloat()
-                    .expandDims(0); // Добавяме още едно измерение за партида
+                    .expandDims(0); // Добавяме още едно измерение за партида (batch size)
+
+                // Проверка на формата на входния тензор (за дебъг)
+                console.log('Входен тензор:', inputTensor.shape);
 
                 // Предсказване на кадъра
                 const prediction = model.predict(inputTensor);
