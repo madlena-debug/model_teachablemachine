@@ -23,6 +23,7 @@
             color: white;
             border: none;
             padding: 10px 20px;
+            margin: 10px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
@@ -44,6 +45,7 @@
 
     <br><br>
     <button id="predictButton">Започни предсказване</button>
+    <button id="reloadButton">Презареди страницата</button>
 
     <p id="result"></p> <!-- За показване на резултата -->
 
@@ -135,6 +137,11 @@
         // Започваме предсказването при натискане на бутона
         document.getElementById('predictButton').addEventListener('click', () => {
             predict(); // Извикваме предсказването само веднъж
+        });
+
+        // Презареждаме страницата при натискане на бутона за презареждане
+        document.getElementById('reloadButton').addEventListener('click', () => {
+            location.reload(); // Презареждаме страницата
         });
     </script>
 </body>
