@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моят сайт с модел</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> <!-- Зареждаме TensorFlow.js -->
+</head>
+<body>
+    <h1>Добре дошли в сайта ми!</h1>
+    <button id="predictButton">Предсказване</button>
+    <script>
+        let model;
+
+        // Функция за зареждане на модела
+        async function loadModel() {
+            model = await tf.loadLayersModel('model/model.json'); // Пътят към модела
+            console.log('Моделът е зареден!');
+        }
+
+        // Зареждаме модела при зареждане на страницата
+        window.onload = loadModel;
+
+        // Примерна функция за предсказване
+        document.getElementById('predictButton').addEventListener('click', () => {
+            if (model) {
+                // Вашият код за предсказване тук
+                console.log('Предсказване на данни');
+            } else {
+                console.log('Моделът не е зареден');
+            }
+        });
+    </script>
+</body>
+</html>
