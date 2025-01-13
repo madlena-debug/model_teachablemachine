@@ -7,15 +7,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> <!-- Зареждаме TensorFlow.js -->
 </head>
 <body>
-    <h1>Добре дошли в сайта ми!</h1>
+    <h1>Добре дошли в сайта ми с модел!</h1>
     <button id="predictButton">Предсказване</button>
-    <p id="result">Тук ще се покаже резултатът</p>
+
     <script>
         let model;
 
-        // Функция за зареждане на модела от GitHub
+        // Функция за зареждане на модела
         async function loadModel() {
-            model = await tf.loadLayersModel('https://raw.githubusercontent.com/madlena-debug/model_teachablemachine/refs/heads/main/model.json'
+            try {
+                // Използвайте правилния Raw URL на вашия модел
+                model = await tf.loadLayersModel('https://raw.githubusercontent.com/madlena-debug/model_teachablemachine/main/model.json');
+                console.log('Моделът е зареден!');
+            } catch (error) {
+                console.error('Грешка при зареждане на модела:', error);
+            }
         }
 
         // Зареждаме модела при зареждане на страницата
@@ -24,18 +30,16 @@
         // Примерна функция за предсказване
         document.getElementById('predictButton').addEventListener('click', () => {
             if (model) {
-                // Примерна логика за предсказване
-                console.log('Предсказване на данни');
-                // Например, създаване на някакъв входен тензор и извършване на предсказване:
-                const inputData = tf.tensor([/* вашите входни данни */]);
-                const prediction = model.predict(inputData);
-                prediction.print();
+                // Примерни данни за предсказване
+                const inputData = tf.tensor([/* тук поставете вашите входни данни за предсказване */]);
 
-                // Показване на резултата
-                document.getElementById('result').innerText = `Резултатът е: ${prediction}`;
+                // Извършване на предсказване
+                const prediction = model.predict(inputData);
+                prediction.print(); // Това ще покаже резултата в конзолата
+
+                console.log('Предсказване е извършено!');
             } else {
-                console.log('Моделът не е зареден');
-                document.getElementById('result').innerText = 'Моделът не е зареден';
+                console.log('Моделът не е зареден.');
             }
         });
     </script>
