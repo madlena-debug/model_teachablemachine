@@ -54,7 +54,7 @@ let model;
                 const maxProbability = Math.max(...result);
                 const classIndex = result.indexOf(maxProbability);
 
-                const classNames = ['Котка сте', 'Не сте котка'];
+                const classNames = ['Котка', 'Не котка'];
                 const message = classNames[classIndex];
 
                 document.getElementById('result').innerText = `Предсказание: ${message}`;
